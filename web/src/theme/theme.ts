@@ -1,26 +1,22 @@
 import { createTheme } from '@mui/material/styles'
 
 export const getTheme = () => {
-  const prefersDarkMode = window.matchMedia(
-    '(prefers-color-scheme: dark)'
-  ).matches
-
   return createTheme({
     palette: {
-      mode: prefersDarkMode ? 'dark' : 'light',
+      mode: 'dark',
 
       primary: {
         main: '#7c4dff',
       },
+      text: {
+        primary: '#ffffff',
+        secondary: 'rgba(255, 255, 255, 0.7)',
+        disabled: 'rgba(255, 255, 255, 0.5)',
+      },
 
       background: {
-        default: prefersDarkMode
-          ? '#09090b'
-          : '#ffffff',
-
-        paper: prefersDarkMode
-          ? '#18181b'
-          : '#ffffff',
+        default: '#09090b',
+        paper: '#18181b',
       },
     },
 
@@ -30,6 +26,9 @@ export const getTheme = () => {
 
     typography: {
       fontFamily: 'Inter, sans-serif',
+      allVariants: {
+        color: '#ffffff',
+      },
     },
   })
 }
