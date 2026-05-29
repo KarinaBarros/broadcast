@@ -5,6 +5,7 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+
   "functions": [
     {
       "source": "functions",
@@ -23,6 +24,7 @@
       ]
     }
   ],
+
   "hosting": {
     "public": "web/dist",
     "ignore": [
@@ -37,9 +39,18 @@
       }
     ]
   },
+
   "auth": {
     "providers": {
       "emailPassword": true
     }
+  },
+
+  "emulators": {
+    "auth": { "port": 9099 },
+    "functions": { "port": 5001 },
+    "firestore": { "port": 8080 },
+    "pubsub": { "port": 8085 },
+    "ui": { "enabled": true, "port": 4000 }
   }
 }
