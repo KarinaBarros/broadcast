@@ -11,27 +11,36 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
-    match /users/{document} {
-      allow read, write:
-      if isAuthenticated();
+    match /connections/{docId} {
+
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.userId);
+
+      allow read, update, delete: if isAuthenticated()
+        && isOwner(resource.data.userId);
     }
 
-    match /connections/{document} {
-      allow read, write:
-      if isAuthenticated()
-      && isOwner(resource.data.userId);
+    match /contacts/{docId} {
+
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.userId);
+
+      allow read, update, delete: if isAuthenticated()
+        && isOwner(resource.data.userId);
     }
 
-    match /contacts/{document} {
-      allow read, write:
-      if isAuthenticated()
-      && isOwner(resource.data.userId);
+    match /messages/{docId} {
+
+      allow create: if isAuthenticated()
+        && isOwner(request.resource.data.userId);
+
+      allow read, update, delete: if isAuthenticated()
+        && isOwner(resource.data.userId);
     }
 
-    match /messages/{document} {
-      allow read, write:
-      if isAuthenticated()
-      && isOwner(resource.data.userId);
+    match /users/{userId} {
+      allow read, write: if isAuthenticated()
+        && request.auth.uid == userId;
     }
   }
 }

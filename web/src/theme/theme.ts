@@ -1,22 +1,22 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme } from "@mui/material/styles";
 
 export const getTheme = () => {
   return createTheme({
     palette: {
-      mode: 'dark',
+      mode: "dark",
 
       primary: {
-        main: '#7c4dff',
+        main: "#7c4dff",
       },
       text: {
-        primary: '#ffffff',
-        secondary: 'rgba(255, 255, 255, 0.7)',
-        disabled: 'rgba(255, 255, 255, 0.5)',
+        primary: "#ffffff",
+        secondary: "rgba(255, 255, 255, 0.7)",
+        disabled: "rgba(255, 255, 255, 0.5)",
       },
 
       background: {
-        default: '#09090b',
-        paper: '#18181b',
+        default: "#09090b",
+        paper: "#18181b",
       },
     },
 
@@ -25,10 +25,10 @@ export const getTheme = () => {
     },
 
     typography: {
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: "Inter, sans-serif",
       allVariants: {
-        color: '#ffffff',
+        color: "#ffffff",
       },
     },
-  })
-}
+  });
+};

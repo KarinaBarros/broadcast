@@ -4,10 +4,7 @@ import type { MessageStatus } from "../types";
 
 const COLLECTION = "messages";
 
-export const createMessage = async (
-  text: string,
-  scheduledAt: Date | null
-) => {
+export const createMessage = async (text: string, scheduledAt: Date | null) => {
   const status: MessageStatus = scheduledAt ? "scheduled" : "sent";
 
   await addDoc(collection(db, COLLECTION), {

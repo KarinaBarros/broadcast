@@ -18,12 +18,19 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          <Route path="/dashboard" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Navigate to="conexoes" replace />} />
 
-            <Route path="conexoes" element={<Conexoes/>} />
-            <Route path="contatos" element={<Contatos/>} />
-            <Route path="mensagens" element={<Mensagens/>} />
+            <Route path="conexoes" element={<Conexoes />} />
+            <Route path="contatos" element={<Contatos />} />
+            <Route path="mensagens" element={<Mensagens />} />
           </Route>
         </Routes>
       </BrowserRouter>
