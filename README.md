@@ -48,6 +48,12 @@ MVP SASS para disparos de mensagens, atenticação e crud completo para conexõe
 
 `firebase emulators:start`
 
+disparo altomático 
+
+`firebase functions:shell`
+
+`processScheduledMessages()`
+
 ## rodar projeto local
 
 `npm run dev`
