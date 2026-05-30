@@ -13,9 +13,6 @@ import { auth, db } from "../lib/firebase";
 
 const COLLECTION = "contacts";
 
-// =====================
-// CREATE
-// =====================
 export const createContact = async (data: {
   name: string;
   phone: string;
@@ -31,9 +28,7 @@ export const createContact = async (data: {
   });
 };
 
-// =====================
-// UPDATE
-// =====================
+
 export const updateContact = async (
   id: string,
   data: Partial<{ name: string; phone: string }>
@@ -41,16 +36,11 @@ export const updateContact = async (
   await updateDoc(doc(db, COLLECTION, id), data);
 };
 
-// =====================
-// DELETE
-// =====================
 export const deleteContact = async (id: string) => {
   await deleteDoc(doc(db, COLLECTION, id));
 };
 
-// =====================
-// SUBSCRIBE (REALTIME)
-// =====================
+
 export const subscribeContacts = (callback: (data: any[]) => void) => {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");

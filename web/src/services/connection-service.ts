@@ -14,14 +14,12 @@ import type { Connection } from "../types";
 
 const COLLECTION = "connections";
 
-// 🔥 helper interno
 const getUser = () => {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");
   return user;
 };
 
-// CREATE
 export const createConnection = async (name: string) => {
   const user = getUser();
 
@@ -32,19 +30,16 @@ export const createConnection = async (name: string) => {
   });
 };
 
-// UPDATE
 export const updateConnection = async (id: string, name: string) => {
   await updateDoc(doc(db, COLLECTION, id), {
     name,
   });
 };
 
-// DELETE
 export const deleteConnection = async (id: string) => {
   await deleteDoc(doc(db, COLLECTION, id));
 };
 
-// SUBSCRIBE LIST (CONEXÕES DO USUÁRIO)
 export const subscribeConnections = (
   callback: (data: Connection[]) => void
 ) => {
@@ -65,7 +60,6 @@ export const subscribeConnections = (
   });
 };
 
-// 🔥 MAPA ID -> NOME (O QUE ESTAVA FALTANDO)
 export const subscribeConnectionsMap = (callback: (map: Record<string, string>) => void) => {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");
@@ -75,7 +69,7 @@ export const subscribeConnectionsMap = (callback: (map: Record<string, string>) 
 
     snapshot.docs
       .map((doc) => doc.data() as any)
-      .filter((c) => c.userId === user.uid) // 🔥 filtro no front
+      .filter((c) => c.userId === user.uid) 
       .forEach((c, index) => {
         const doc = snapshot.docs[index];
         map[doc.id] = c.name;

@@ -14,9 +14,6 @@ import type { Message } from "../types";
 
 const COLLECTION = "messages";
 
-// =====================
-// CREATE
-// =====================
 export const createMessage = async (data: {
   connectionId: string;
   contactIds: string[];
@@ -35,9 +32,6 @@ export const createMessage = async (data: {
   });
 };
 
-// =====================
-// UPDATE
-// =====================
 export const updateMessage = async (
   id: string,
   data: Partial<Pick<Message, "text" | "scheduledAt" | "status">>
@@ -45,16 +39,10 @@ export const updateMessage = async (
   await updateDoc(doc(db, COLLECTION, id), data);
 };
 
-// =====================
-// DELETE
-// =====================
 export const deleteMessage = async (id: string) => {
   await deleteDoc(doc(db, COLLECTION, id));
 };
 
-// =====================
-// SUBSCRIBE
-// =====================
 export const subscribeMessages = (callback: (data: Message[]) => void) => {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");

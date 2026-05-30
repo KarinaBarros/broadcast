@@ -40,6 +40,7 @@ function Mensagens() {
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [filter, setFilter] = useState<"all" | "sent" | "scheduled">("all");
 
   useEffect(() => {
     const unsub = subscribeMessages(setMessages);
@@ -59,11 +60,9 @@ function Mensagens() {
     }
 
     const unsub = subscribeContacts((all: any[]) => {
-      const filtered = all.filter(
-        (c) => c.connectionId === selectedConnectionId
+      setAvailableContacts(
+        all.filter((c) => c.connectionId === selectedConnectionId)
       );
-
-      setAvailableContacts(filtered);
     });
 
     return () => unsub();
@@ -87,16 +86,19 @@ function Mensagens() {
   const handleUpdate = async () => {
     if (!editId) return;
 
-    await updateMessage(editId, {
-      text: editText,
-    });
+    await updateMessage(editId, { text: editText });
 
     setEditOpen(false);
     setEditId(null);
     setEditText("");
   };
-  
+
   const canSchedule = scheduledDate && scheduledTime;
+
+  const filteredMessages = messages.filter((m) => {
+    if (filter === "all") return true;
+    return m.status === filter;
+  });
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -114,31 +116,51 @@ function Mensagens() {
         </Button>
       </div>
 
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <Button
+          variant={filter === "all" ? "contained" : "outlined"}
+          onClick={() => setFilter("all")}
+        >
+          Todas
+        </Button>
+
+        <Button
+          variant={filter === "sent" ? "contained" : "outlined"}
+          onClick={() => setFilter("sent")}
+        >
+          Enviadas
+        </Button>
+
+        <Button
+          variant={filter === "scheduled" ? "contained" : "outlined"}
+          onClick={() => setFilter("scheduled")}
+        >
+          Agendadas
+        </Button>
+      </Box>
+
       <Box className="flex flex-col gap-2">
 
-        {messages.map((m) => (
+        {filteredMessages.map((m) => (
           <Card key={m.id}>
             <CardContent>
 
-              <Typography variant="body1">
-                {m.text}
-              </Typography>
+              <Typography>{m.text}</Typography>
 
               <Typography variant="caption" sx={{ display: "block" }}>
                 Status:{" "}
-                <span
-                  style={{
-                    color:
-                      m.status === "sent"
-                        ? "green"
-                        : m.status === "scheduled"
-                          ? "orange"
-                          : "gray",
-                    fontWeight: 600,
-                  }}
-                >
-                  {m.status}
-                </span>
+                <b style={{
+                  color:
+                    m.status === "sent"
+                      ? "green"
+                      : m.status === "scheduled"
+                      ? "orange"
+                      : "gray",
+                }}>
+                  {m.status === "sent"
+                    ? "Enviada"
+                    : "Agendada"}
+                </b>
               </Typography>
 
               {m.scheduledAt && (
@@ -188,10 +210,8 @@ function Mensagens() {
 
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Conexão</InputLabel>
-
             <Select
               value={selectedConnectionId}
-              label="Conexão"
               onChange={(e) => {
                 setSelectedConnectionId(e.target.value);
                 setSelectedContacts([]);
@@ -207,7 +227,6 @@ function Mensagens() {
 
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Contatos</InputLabel>
-
             <Select
               multiple
               value={selectedContacts}
@@ -217,13 +236,6 @@ function Mensagens() {
                     ? e.target.value.split(",")
                     : e.target.value
                 )
-              }
-              label="Contatos"
-              renderValue={(selected) =>
-                availableContacts
-                  .filter((c) => selected.includes(c.id))
-                  .map((c) => c.name)
-                  .join(", ")
               }
             >
               {availableContacts.map((c) => (
@@ -235,7 +247,6 @@ function Mensagens() {
           </FormControl>
 
           <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-
             <TextField
               type="date"
               value={scheduledDate}
@@ -249,19 +260,15 @@ function Mensagens() {
               onChange={(e) => setScheduledTime(e.target.value)}
               fullWidth
             />
-
           </Box>
 
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={resetForm}>
-            Cancelar
-          </Button>
+          <Button onClick={resetForm}>Cancelar</Button>
 
           <Button
             variant="contained"
-            color="success"
             onClick={async () => {
               await createMessage({
                 text,
@@ -281,15 +288,11 @@ function Mensagens() {
             variant="outlined"
             disabled={!canSchedule}
             onClick={async () => {
-              const scheduledAt = new Date(
-                `${scheduledDate}T${scheduledTime}`
-              );
-
               await createMessage({
                 text,
                 connectionId: selectedConnectionId,
                 contactIds: selectedContacts,
-                scheduledAt,
+                scheduledAt: new Date(`${scheduledDate}T${scheduledTime}`),
                 status: "scheduled",
               });
 
@@ -298,6 +301,7 @@ function Mensagens() {
           >
             Agendar
           </Button>
+
         </DialogActions>
       </Dialog>
 
@@ -307,7 +311,6 @@ function Mensagens() {
         <DialogContent>
           <TextField
             fullWidth
-            label="Texto"
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
             sx={{ mt: 1 }}
@@ -315,10 +318,7 @@ function Mensagens() {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>
-            Cancelar
-          </Button>
-
+          <Button onClick={() => setEditOpen(false)}>Cancelar</Button>
           <Button variant="contained" onClick={handleUpdate}>
             Salvar
           </Button>
