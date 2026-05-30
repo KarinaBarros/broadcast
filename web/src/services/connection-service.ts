@@ -1,11 +1,12 @@
 import {
   addDoc,
   collection,
-  deleteDoc,
-  doc,
   onSnapshot,
   query,
   where,
+  doc,
+  updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { auth, db } from "../lib/firebase";
@@ -13,30 +14,46 @@ import type { Connection } from "../types";
 
 const COLLECTION = "connections";
 
-export const createConnection = async (name: string) => {
+// 🔥 helper interno
+const getUser = () => {
   const user = auth.currentUser;
-  const userId = user?.uid;
-  try{
-  await addDoc(collection(db, COLLECTION), {
-    userId,
-    name,
-    createdAt: new Date(),
-  });
-  }catch(err){
-    console.error(err);
-   
-  }
+  if (!user) throw new Error("Not authenticated");
+  return user;
 };
 
+// CREATE
+export const createConnection = async (name: string) => {
+  const user = getUser();
+
+  await addDoc(collection(db, COLLECTION), {
+    name,
+    userId: user.uid,
+    createdAt: new Date(),
+  });
+};
+
+// UPDATE
+export const updateConnection = async (id: string, name: string) => {
+  await updateDoc(doc(db, COLLECTION, id), {
+    name,
+  });
+};
+
+// DELETE
 export const deleteConnection = async (id: string) => {
   await deleteDoc(doc(db, COLLECTION, id));
 };
 
+// SUBSCRIBE LIST (CONEXÕES DO USUÁRIO)
 export const subscribeConnections = (
-  userId: string,
-  callback: (data: Connection[]) => void,
+  callback: (data: Connection[]) => void
 ) => {
-  const q = query(collection(db, COLLECTION), where("userId", "==", userId));
+  const user = getUser();
+
+  const q = query(
+    collection(db, COLLECTION),
+    where("userId", "==", user.uid)
+  );
 
   return onSnapshot(q, (snapshot) => {
     const data: Connection[] = snapshot.docs.map((doc) => ({
@@ -46,4 +63,25 @@ export const subscribeConnections = (
 
     callback(data);
   });
+};
+
+// 🔥 MAPA ID -> NOME (O QUE ESTAVA FALTANDO)
+export const subscribeConnectionsMap = (callback: (map: Record<string, string>) => void) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not authenticated");
+
+  return onSnapshot(collection(db, "connections"), (snapshot) => {
+    const map: Record<string, string> = {};
+
+    snapshot.docs
+      .map((doc) => doc.data() as any)
+      .filter((c) => c.userId === user.uid) // 🔥 filtro no front
+      .forEach((c, index) => {
+        const doc = snapshot.docs[index];
+        map[doc.id] = c.name;
+      });
+
+    callback(map);
+  });
+
 };

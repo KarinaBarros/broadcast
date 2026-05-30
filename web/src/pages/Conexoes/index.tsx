@@ -1,49 +1,140 @@
-import { useState } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
-import { createConnection } from "../../services/connection-service";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  Typography,
+  IconButton,
+  TextField,
+  Button,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  subscribeConnections,
+  deleteConnection,
+  updateConnection,
+  createConnection,
+} from "../../services/connection-service";
 
 function Conexoes() {
+  const [connections, setConnections] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
   const [name, setName] = useState("");
-  return (
-    <div className="flex flex-col items-center h-screen gap-4 p-4">
-      <div className="flex w-full">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-bold">Conexões</h1>
-          <span className="text-gray-500">Gerencie suas conexões</span>
-        </div>
+  const [editId, setEditId] = useState<string | null>(null);
 
-        <div className="ml-auto my-auto">
-          <Button variant="contained" onClick={() => setOpen(true)}>
-            + Nova Conexão
-          </Button>
-        </div>
+  useEffect(() => {
+    const unsub = subscribeConnections(setConnections);
+    return () => unsub();
+  }, []);
+
+  const openCreate = () => {
+    setMode("create");
+    setName("");
+    setEditId(null);
+    setOpen(true);
+  };
+
+  const openEdit = (id: string, currentName: string) => {
+    setMode("edit");
+    setEditId(id);
+    setName(currentName);
+    setOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (mode === "create") {
+      await createConnection(name);
+    }
+
+    if (mode === "edit" && editId) {
+      await updateConnection(editId, name);
+    }
+
+    setOpen(false);
+    setName("");
+    setEditId(null);
+  };
+
+  return (
+    <div className="flex flex-col gap-4 p-4">
+
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Conexões</h1>
+
+        <Button variant="contained" onClick={openCreate}>
+          + Nova Conexão
+        </Button>
       </div>
 
-       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Nova Conexão</DialogTitle>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        {connections.map((conn) => (
+          <Card key={conn.id} sx={{ width: 280 }}>
+            <CardContent>
+
+              <Typography variant="h6">
+                {conn.name}
+              </Typography>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 1,
+                }}
+              >
+                <IconButton
+                  onClick={() => openEdit(conn.id, conn.name)}
+                >
+                  <EditIcon />
+                </IconButton>
+
+                <IconButton
+                  color="error"
+                  onClick={() => deleteConnection(conn.id)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>
+          {mode === "create"
+            ? "Nova Conexão"
+            : "Editar Conexão"}
+        </DialogTitle>
 
         <DialogContent>
           <TextField
-            placeholder="Nome da conexão"
-            label="Nome"
             fullWidth
-            sx={{ mt: 1 }}
+            label="Nome"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            sx={{ mt: 1 }}
           />
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={async() => {await createConnection(name); setName("")}} color="primary">
-            Criar
-          </Button>
-          <Button onClick={() => {setOpen(false); setName("")}} color="primary">
+          <Button onClick={() => setOpen(false)}>
             Cancelar
+          </Button>
+
+          <Button variant="contained" onClick={handleSubmit}>
+            {mode === "create" ? "Criar" : "Salvar"}
           </Button>
         </DialogActions>
       </Dialog>
-  
+
     </div>
   );
 }
